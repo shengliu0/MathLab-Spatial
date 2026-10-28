@@ -690,15 +690,15 @@ object FractalDemo : SpecDemo() {
     override val tapTargets: List<TapTarget> get() {
         val t = ArrayList<TapTarget>()
         if (station == 0) {
-            t += TapTarget("NextBtn", "小海绵 → 挖下一层", "Little sponge → carve")
-            t += TapTarget("PrevBtn", "小方块 → 退一层", "Little cube → undo")
-            t += TapTarget("ZoomKnob", "放大把手 → 钻进去", "Zoom knob → dive in") { diving }
+            t += TapTarget("NextBtn", "小海绵 → 挖下一层", "Little sponge → carve", enabled = { targetLevel < 3 }, why = Bi("已到第 3 层（8000 块）；第 4 层要 160000 块，太多了", "Level 3 already (8000 cubes); level 4 would need 160 000"))
+            t += TapTarget("PrevBtn", "小方块 → 退一层", "Little cube → undo", enabled = { targetLevel > 0 }, why = Bi("已经是第 0 层：实心方块，没得退了", "Already level 0: a solid cube, nothing to undo"))
+            t += TapTarget("ZoomKnob", "放大把手 → 钻进去", "Zoom knob → dive in", enabled = { level >= 1 || diving }, why = Bi("先挖一层：实心方块放大还是方块", "Carve a level first: a solid cube just looks like a cube")) { diving }
         } else {
-            for (i in 0..5) t += TapTarget("Ex$i", exShortZh(i) + " → 数", exShortEn(i) + " → count") { exploded[i] }
+            for (i in 0..5) t += TapTarget("Ex$i", exShortZh(i) + " → 数", exShortEn(i) + " → count", enabled = { !countingNow(i) }, why = Bi("正在数复制品，数完再捏就收起", "Still counting the copies — pinch again when it is done")) { exploded[i] }
             t += TapTarget("DKnob", "D 把手 → +0.25", "D knob → +0.25")
         }
-        t += TapTarget("Tok0", "① 门格海绵", "① Sponge") { station == 0 }
-        t += TapTarget("Tok1", "② 数维数", "② Dimension") { station == 1 }
+        t += TapTarget("Tok0", "① 门格海绵", "① Sponge", enabled = { station != 0 }, why = Bi("已经在这一站：① 门格海绵", "Already on this station: ① Sponge")) { station == 0 }
+        t += TapTarget("Tok1", "② 数维数", "② Dimension", enabled = { station != 1 }, why = Bi("已经在这一站：② 数维数", "Already on this station: ② Dimension")) { station == 1 }
         return t
     }
     private fun exShortZh(i: Int) = arrayOf("线段", "地毯", "正方形", "四面体", "海绵", "立方体")[i]  // i18n-ok (zh half of a TapTarget pair)
@@ -748,7 +748,13 @@ object FractalDemo : SpecDemo() {
 
     // ---- actions (panel, lesson autoplay and tests call these)
     fun selectStation(s: Int) { station = s.coerceIn(0, 1); bump() }
-    fun carveTo(n: Int) { targetLevel = n.coerceIn(0, 3); bump() }
+    fun carveTo(n: Int) {
+        targetLevel = n.coerceIn(0, 3)
+        // a change of mind mid-carve turns the running step around at once (debris flies back) instead of
+        // queueing behind it; animateDebris is symmetric in animT, so 1 − animT continues without a jump
+        if ((animDir > 0 && targetLevel < animK) || (animDir < 0 && targetLevel >= animK)) { animDir = -animDir; animT = 1f - animT }
+        bump()
+    }
     /** Jump without animation (lesson resets). */
     fun levelNow(n: Int) { level = n.coerceIn(0, 3); targetLevel = level; animDir = 0; animT = 0f; hideDebris(); bump() }
     fun zoomTo(z: Float) { zoom = if (level == 0) 1f else z.coerceIn(1f, 3f); bump() }
@@ -759,6 +765,7 @@ object FractalDemo : SpecDemo() {
         else if (counting[i] >= exBase[i].size) { exploded[i] = false; counting[i] = -1 }
         bump()
     }
+    private fun countingNow(i: Int) = exploded[i] && counting[i] < exBase[i].size
     fun countAll() { for (i in 0..5) if (!exploded[i]) tapExhibit(i); bump() }
     fun resetAll() {
         if (station == 0) { levelNow(0); zoomTo(1f); diving = false }
@@ -880,7 +887,7 @@ object FractalDemo : SpecDemo() {
                     }
                     LabSwitch(tr("钻进去", "Dive in"), diving) { diveTo(it) }
                 } else {
-                    Button(onClick = { countAll() }) { Text(tr("全部数一遍", "Count all")) }
+                    Button(onClick = { countAll() }, enabled = exploded.any { !it }) { Text(tr("全部数一遍", "Count all")) }
                 }
                 Button(onClick = { resetAll() }) { Text(tr("重置", "Reset")) }
             }

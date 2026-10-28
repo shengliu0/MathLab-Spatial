@@ -1093,10 +1093,10 @@ object ExponentialDemo : SpecDemo() {
                 t += TapTarget("R0Knob", "R0 把手 → 下一档", "R0 knob → next")
             }
         }
-        t += TapTarget("Tok0", "① 棋盘", "① Board") { station == 0 }
-        t += TapTarget("Tok1", "② 赛跑", "② Race") { station == 1 }
-        t += TapTarget("Tok2", "③ 复利", "③ Interest") { station == 2 }
-        t += TapTarget("Tok3", "④ 传播", "④ Spread") { station == 3 }
+        t += TapTarget("Tok0", "① 棋盘", "① Board", enabled = { station != 0 }, why = Bi("已经在这一站：① 棋盘", "Already on this station: ① Board")) { station == 0 }
+        t += TapTarget("Tok1", "② 赛跑", "② Race", enabled = { station != 1 }, why = Bi("已经在这一站：② 赛跑", "Already on this station: ② Race")) { station == 1 }
+        t += TapTarget("Tok2", "③ 复利", "③ Interest", enabled = { station != 2 }, why = Bi("已经在这一站：③ 复利", "Already on this station: ③ Interest")) { station == 2 }
+        t += TapTarget("Tok3", "④ 传播", "④ Spread", enabled = { station != 3 }, why = Bi("已经在这一站：④ 传播", "Already on this station: ④ Spread")) { station == 3 }
         return t
     }
 
@@ -1317,7 +1317,7 @@ object ExponentialDemo : SpecDemo() {
                 when (st) {
                     0 -> {
                         Button(onClick = { toggleAuto1() }) { Text(if (auto1) tr("⏸ 暂停", "⏸ Pause") else tr("▶ 自动填", "▶ Auto-fill")) }
-                        Button(onClick = { fillTo(0) }) { Text(tr("清空", "Clear")) }
+                        Button(onClick = { fillTo(0) }, enabled = filled > 0) { Text(tr("清空", "Clear")) }
                         LabSlider(tr("格数", "Squares"), filled.toFloat(), 0f..64f, "$filled", width = 380) { fillTo(it.roundToInt()) }
                     }
                     1 -> {

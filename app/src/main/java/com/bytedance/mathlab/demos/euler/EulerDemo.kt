@@ -948,9 +948,9 @@ object EulerDemo : SpecDemo() {
                 t += TapTarget("SeriesTag", "级数牌 → 重放", "Series plaque → replay")
             }
         }
-        t += TapTarget("Tok0", "① 螺旋", "① Helix") { station == 0 }
-        t += TapTarget("Tok1", "② 乘法", "② Multiply") { station == 1 }
-        t += TapTarget("Tok2", "③ e^iπ", "③ e^iπ") { station == 2 }
+        t += TapTarget("Tok0", "① 螺旋", "① Helix", enabled = { station != 0 }, why = Bi("已经在这一站：① 螺旋", "Already on this station: ① Helix")) { station == 0 }
+        t += TapTarget("Tok1", "② 乘法", "② Multiply", enabled = { station != 1 }, why = Bi("已经在这一站：② 乘法", "Already on this station: ② Multiply")) { station == 1 }
+        t += TapTarget("Tok2", "③ e^iπ", "③ e^iπ", enabled = { station != 2 }, why = Bi("已经在这一站：③ e^iπ", "Already on this station: ③ e^iπ")) { station == 2 }
         return t
     }
 
@@ -1200,13 +1200,13 @@ object EulerDemo : SpecDemo() {
                 1 -> {
                     Button(onClick = { timesI() }) { Text("×i") }
                     LabSwitch(tr("w × 平面", "w × plane"), showWGrid) { showWGrid = it; lastZW = null; bump() }
-                    Button(onClick = { zPreset = 0; wPreset = 0; setZ(Z_PRESETS[0]); setW(W_PRESETS[0]) }) { Text(tr("重置", "Reset")) }
+                    Button(onClick = { zPreset = 0; wPreset = 0; setZ(Z_PRESETS[0]); setW(W_PRESETS[0]) }, enabled = z != Z_PRESETS[0] || w != W_PRESETS[0]) { Text(tr("重置", "Reset")) }
                     LabSlider("|w|", w.abs.toFloat(), 0.25f..1.6f, num(w.abs, 2), width = 380) { setW(Complex.polar(it.toDouble(), w.arg)) }
                     LabSlider("arg w", Math.toDegrees(w.arg).toFloat(), -180f..180f, deg(w.arg), width = 380) { setW(Complex.polar(w.abs, Math.toRadians(it.roundToInt().toDouble()))) }
                 }
                 else -> {
-                    Button(onClick = { walkTo(PI) }) { Text(tr("▶ 走到 π", "▶ Walk to π")) }
-                    Button(onClick = { walkTo(2 * PI) }) { Text(tr("▶ 走到 2π", "▶ Walk to 2π")) }
+                    Button(onClick = { walkTo(PI) }, enabled = abs(theta - PI) > 1e-6 || chainPlay) { Text(tr("▶ 走到 π", "▶ Walk to π")) }
+                    Button(onClick = { walkTo(2 * PI) }, enabled = abs(theta - 2 * PI) > 1e-6 || chainPlay) { Text(tr("▶ 走到 2π", "▶ Walk to 2π")) }
                     Button(onClick = { playSeries() }) { Text(tr("▶ 级数", "▶ Series")) }
                     LabSlider("θ", theta.toFloat(), 0f..(2 * PI).toFloat(), thetaStr(theta), width = 420) {
                         var t = it.toDouble(); for (l in LANDMARKS) if (abs(t - l) < 0.05) t = l

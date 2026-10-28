@@ -623,7 +623,8 @@ object GaltonDemo : SpecDemo() {
 
     private fun updateReadout() {
         val n = rows
-        val ut = if (unit > 1) tr(" · 1 颗 = $unit 球", " · 1 ball = $unit") else ""
+        val ut = (if (unit > 1) tr(" · 1 颗 = $unit 球", " · 1 ball = $unit") else "") +
+            (if (pending > 0) tr(" · 待放 ${grp(pending.toLong())}", " · queued ${grp(pending.toLong())}") else "")
         val l1 = tr("① 球 ${grp(landed)} · 行 n = $n · p = ${f2(p)} · 均值 ${f2(GaltonSim.mean(counts))}（np = ${f2(n * p)}）· 方差 ${f2(GaltonSim.variance(counts))}（np(1−p) = ${f2(n * p * (1 - p))}）$ut",
             "① Balls ${grp(landed)} · rows n = $n · p = ${f2(p)} · mean ${f2(GaltonSim.mean(counts))} (np = ${f2(n * p)}) · var ${f2(GaltonSim.variance(counts))} (np(1−p) = ${f2(n * p * (1 - p))})$ut")
         val k = Die.KS[kIdx]
@@ -666,12 +667,12 @@ object GaltonDemo : SpecDemo() {
             t += TapTarget("RowsKnob", "行数把手 → +2 行", "Rows knob → +2 rows")
         } else {
             t += TapTarget("KKnob", "k 把手 → 下一行", "k knob → next row")
-            t += TapTarget("Die0", "公平骰子", "Fair die") { die == 0 }
-            t += TapTarget("Die1", "歪骰子", "Loaded die") { die == 1 }
-            t += TapTarget("Die2", "1 或 6 骰子", "1-or-6 die") { die == 2 }
+            t += TapTarget("Die0", "公平骰子", "Fair die", enabled = { die != 0 }, why = Bi("现在用的就是公平骰子", "The fair die is already in use")) { die == 0 }
+            t += TapTarget("Die1", "歪骰子", "Loaded die", enabled = { die != 1 }, why = Bi("现在用的就是歪骰子", "The loaded die is already in use")) { die == 1 }
+            t += TapTarget("Die2", "1 或 6 骰子", "1-or-6 die", enabled = { die != 2 }, why = Bi("现在用的就是 1 或 6 骰子", "The 1-or-6 die is already in use")) { die == 2 }
         }
-        t += TapTarget("Tok0", "① 高尔顿板", "① Board") { station == 0 }
-        t += TapTarget("Tok1", "② 骰子之和", "② Dice sums") { station == 1 }
+        t += TapTarget("Tok0", "① 高尔顿板", "① Board", enabled = { station != 0 }, why = Bi("已经在这一站：① 高尔顿板", "Already on this station: ① Board")) { station == 0 }
+        t += TapTarget("Tok1", "② 骰子之和", "② Dice sums", enabled = { station != 1 }, why = Bi("已经在这一站：② 骰子之和", "Already on this station: ② Dice sums")) { station == 1 }
         return t
     }
 
@@ -856,7 +857,7 @@ object GaltonDemo : SpecDemo() {
                     }
                     Button(onClick = { release(burst) }) { Text(tr("▶ 放球", "▶ Drop")) }
                     Button(onClick = { fastFill(1000) }) { Text(tr("⚡ 快速 1000", "⚡ Fast 1000")) }
-                    Button(onClick = { clearBins() }) { Text(tr("清空", "Clear")) }
+                    Button(onClick = { clearBins() }, enabled = landed > 0 || pending > 0 || active.any { it }) { Text(tr("清空", "Clear")) }
                     LabSwitch(tr("曲线", "Curves"), overlay) { overlayTo(it) }
                 } else {
                     SegmentControl {

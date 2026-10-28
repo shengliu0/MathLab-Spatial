@@ -151,6 +151,7 @@ object LinearDemo : SpecDemo() {
     private var detAtStep = 1.0
     private val PROBE0 = Vec3(-0.5, 0.6, 0.75)
     private var probe = PROBE0
+    private var appliedProbe: Vec3? = null
     private var clock = 0f
     private var shelfKey = -1
 
@@ -251,7 +252,7 @@ object LinearDemo : SpecDemo() {
     override fun buildSpec(cacheDir: File): Node {
         // REBUILD IDEMPOTENCE: every piece of state back to the opening values
         preset = Preset.WELCOME; speedIdx = 1; showEigen = true; showProbe = true; composeBA = true; randomSeed = 0
-        shown = Mat3.identity(); applied = null; appliedFlags = -1; stages.clear(); stageT = 0f
+        shown = Mat3.identity(); applied = null; appliedFlags = -1; appliedProbe = null; stages.clear(); stageT = 0f
         dragCol = -1; dragRaw = Vec3.ZERO; draggedJ = false; detAtStep = 1.0; probe = PROBE0; clock = 0f; shelfKey = -1
         eLines = emptyList(); eSpaces = emptyList(); eComplex = null; eScalar = false; rank = 3; imgU = Mat3.identity()
         lattice.clear(); cubeEdges.clear()
@@ -409,7 +410,7 @@ object LinearDemo : SpecDemo() {
         advance(dt)
         val flags = (if (showEigen) 1 else 0) or (if (showProbe) 2 else 0) or (if (ghostOn()) 4 else 0) or
             (if (composeBA) 8 else 0) or ((dragCol + 1) shl 4)
-        if (applied != shown || flags != appliedFlags) { applyScene(shown); applied = shown; appliedFlags = flags }
+        if (applied != shown || flags != appliedFlags || appliedProbe != probe) { applyScene(shown); applied = shown; appliedFlags = flags; appliedProbe = probe }
         pulse()
         updateShelf()
         updateReadout()
@@ -646,10 +647,10 @@ object LinearDemo : SpecDemo() {
     // ---------------------------------------------------------------- interaction
 
     override val tapTargets get() = listOf(
-        TapTarget("TipI", "î 箭头尖 → 复位", "î → reset"),
-        TapTarget("TipJ", "ĵ 箭头尖 → 复位", "ĵ → reset"),
-        TapTarget("TipK", "k̂ 箭头尖 → 复位", "k̂ → reset"),
-        TapTarget("Probe", "探针 v → 复位", "Probe v → reset"),
+        TapTarget("TipI", "î 箭头尖 → 复位", "î → reset", enabled = { !columnHome(0) }, why = Bi("î′ 已经在 (1, 0, 0)，拖动箭头尖改变它", "î′ is already (1, 0, 0) — drag the tip to change it")),
+        TapTarget("TipJ", "ĵ 箭头尖 → 复位", "ĵ → reset", enabled = { !columnHome(1) }, why = Bi("ĵ′ 已经在 (0, 1, 0)，拖动箭头尖改变它", "ĵ′ is already (0, 1, 0) — drag the tip to change it")),
+        TapTarget("TipK", "k̂ 箭头尖 → 复位", "k̂ → reset", enabled = { !columnHome(2) }, why = Bi("k̂′ 已经在 (0, 0, 1)，拖动箭头尖改变它", "k̂′ is already (0, 0, 1) — drag the tip to change it")),
+        TapTarget("Probe", "探针 v → 复位", "Probe v → reset", enabled = { !probeHome() }, why = Bi("探针 v 已在起始位置，拖动它去找特征方向", "Probe v is already at its start — drag it to hunt for an eigen-direction")),
         TapTarget("Shelf0", "恒等 → 播放", "Identity → play") { preset == Preset.IDENTITY },
         TapTarget("Shelf1", "旋转 → 播放", "Rotate → play") { preset == Preset.ROTATE },
         TapTarget("Shelf2", "剪切 → 播放", "Shear → play") { preset == Preset.SHEAR },
@@ -670,6 +671,10 @@ object LinearDemo : SpecDemo() {
             name.startsWith("Shelf") -> name.removePrefix("Shelf").toIntOrNull()?.let { k -> SHELF.getOrNull(k)?.let { choose(it) } }
         }
     }
+
+    /** Column [c] already is (or is animating to) its unit vector: "reset" would do nothing. */
+    private fun columnHome(c: Int) = dragCol != c && ((stages.lastOrNull()?.to ?: shown).col(c) - Vec3.axis(c)).norm < 1e-9
+    private fun probeHome() = showProbe && probe == PROBE0
 
     /** Send one basis vector home: the column animates back to the unit vector. */
     private fun resetColumn(c: Int) {

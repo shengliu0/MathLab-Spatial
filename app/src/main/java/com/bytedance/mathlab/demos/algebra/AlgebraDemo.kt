@@ -778,10 +778,10 @@ object AlgebraDemo : SpecDemo() {
                 t += TapTarget("KnobB_$s", "b 把手 → +0.5", "b knob → +0.5")
             }
         }
-        t += TapTarget("Tok0", "① 站", "① station") { station == 0 }
-        t += TapTarget("Tok1", "② 站", "② station") { station == 1 }
-        t += TapTarget("Tok2", "③ 站", "③ station") { station == 2 }
-        t += TapTarget("Tok3", "④ 站", "④ station") { station == 3 }
+        t += TapTarget("Tok0", "① 站", "① station", enabled = { station != 0 }, why = Bi("已经在这一站：① 站", "Already on this station: ① station")) { station == 0 }
+        t += TapTarget("Tok1", "② 站", "② station", enabled = { station != 1 }, why = Bi("已经在这一站：② 站", "Already on this station: ② station")) { station == 1 }
+        t += TapTarget("Tok2", "③ 站", "③ station", enabled = { station != 2 }, why = Bi("已经在这一站：③ 站", "Already on this station: ③ station")) { station == 2 }
+        t += TapTarget("Tok3", "④ 站", "④ station", enabled = { station != 3 }, why = Bi("已经在这一站：④ 站", "Already on this station: ④ station")) { station == 3 }
         return t
     }
 
