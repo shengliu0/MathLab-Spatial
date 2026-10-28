@@ -40,6 +40,7 @@ import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
 import com.bytedance.mathlab.lab.LessonStep
 import com.bytedance.mathlab.lab.Q
+import com.bytedance.mathlab.lab.Sfx
 import com.bytedance.mathlab.lab.SpecDemo
 import com.bytedance.mathlab.lab.TapTarget
 import com.bytedance.mathlab.lab.spec.Blend
@@ -255,6 +256,7 @@ object LinearDemo : SpecDemo() {
         shown = Mat3.identity(); applied = null; appliedFlags = -1; appliedProbe = null; stages.clear(); stageT = 0f
         dragCol = -1; dragRaw = Vec3.ZERO; draggedJ = false; detAtStep = 1.0; probe = PROBE0; clock = 0f; shelfKey = -1
         eLines = emptyList(); eSpaces = emptyList(); eComplex = null; eScalar = false; rank = 3; imgU = Mat3.identity()
+        sndArmed = false
         lattice.clear(); cubeEdges.clear()
         // the opening: plain space for a moment, then a general linear map unfolds
         stages += Stage(Mat3.identity(), LinearPresets.WELCOME, 1.5f, 0.2f)
@@ -411,10 +413,37 @@ object LinearDemo : SpecDemo() {
         val flags = (if (showEigen) 1 else 0) or (if (showProbe) 2 else 0) or (if (ghostOn()) 4 else 0) or
             (if (composeBA) 8 else 0) or ((dragCol + 1) shl 4)
         if (applied != shown || flags != appliedFlags || appliedProbe != probe) { applyScene(shown); applied = shown; appliedFlags = flags; appliedProbe = probe }
+        sounds()
         pulse()
         updateShelf()
         updateReadout()
         updateLabels()
+    }
+
+    // ---------------------------------------------------------------- sound (transitions of the shown matrix)
+    private var sndArmed = false
+    private var sStages = 0
+    private var sRank = 3
+    private var sDetSign = 1
+    private var sEigenHit = false
+
+    private fun sounds() {
+        val det = shown.det()
+        val sign = if (det > 1e-6) 1 else if (det < -1e-6) -1 else 0
+        val av = shown * probe
+        val sinA = (av cross probe).norm / max(1e-9, av.norm * probe.norm)
+        val hit = showProbe && av.norm > 0.05 && (if (sEigenHit) sinA < 0.06 else sinA < 0.03)
+        if (sndArmed) {
+            // an animation stage lands (identity reached / the matrix arrives): a soft pop, deeper for a small |det|
+            if (stages.size < sStages) Sfx.play(Sfx.POP, 0.4f, (0.75f + 0.25f * abs(det).toFloat()).coerceIn(0.6f, 1.4f))
+            // space collapses onto a plane / line (rank drops): a low thud
+            if (rank < sRank) Sfx.play(Sfx.THUD, 0.55f, if (rank == 1) 0.8f else 1f)
+            // orientation flips (det changes sign through 0, the F is mirrored)
+            else if (sign != 0 && sDetSign != 0 && sign != sDetSign) Sfx.play(Sfx.GLASS, 0.4f, if (sign < 0) 0.85f else 1.1f)
+            // the probe v lands on an eigen-direction (Av ∥ v): the hunt succeeds
+            if (hit && !sEigenHit) Sfx.play(Sfx.CHIME, 0.5f)
+        }
+        sStages = stages.size; sRank = rank; if (sign != 0) sDetSign = sign; sEigenHit = hit; sndArmed = true
     }
 
     private fun advance(dt: Float) {

@@ -33,6 +33,7 @@ import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
 import com.bytedance.mathlab.lab.LessonStep
 import com.bytedance.mathlab.lab.Q
+import com.bytedance.mathlab.lab.Sfx
 import com.bytedance.mathlab.lab.SpecDemo
 import com.bytedance.mathlab.lab.TapTarget
 import com.bytedance.mathlab.lab.spec.Blend
@@ -643,7 +644,10 @@ object EulerDemo : SpecDemo() {
 
     // ---------------------------------------------------------------- ①
     private fun update1(dt: Float) {
+        val turn0 = floor(abs(builtOmega) * t1 / (2 * PI.toFloat()))
         if (play1) t1 = (t1 + dt * spd * RATE1) % T_MAX
+        // the running point completes one more turn of the helix (one period of cos ωt and sin ωt): a quiet tick
+        if (play1 && dt > 0f && floor(abs(builtOmega) * t1 / (2 * PI.toFloat())) > turn0) Sfx.play(Sfx.TICK, 0.18f, 1.1f, P1X / 0.9f)
         cooldown -= dt
         if ((omega != builtOmega || sigma != builtSigma) && cooldown <= 0f) rebuildHelix()
         // the rig: swing toward the chosen view
@@ -694,6 +698,9 @@ object EulerDemo : SpecDemo() {
             animS += dt * spd / 0.9f
             if (animS >= 1f) {
                 z = Euler.quarterTurns(zFrom, 1); animS = -1f; quarterTurns++; ghostT = 3f
+                // ×i lands: z has turned a quarter; on the 2nd turn (i² = −1) a bell, otherwise a pop rising with the power
+                if (quarterTurns % 4 == 2) Sfx.play(Sfx.CHIME, 0.5f, 1f, O2.x / 0.9f)
+                else Sfx.play(Sfx.POP, 0.45f, 0.9f + 0.1f * (quarterTurns % 4), O2.x / 0.9f)
                 if (pendingTurns > 0) { pendingTurns--; startTurn() }
                 bump()
             } else z = zFrom * Euler.cis(PI / 2 * sm(animS))
@@ -760,11 +767,19 @@ object EulerDemo : SpecDemo() {
     private fun update3(dt: Float) {
         if (walking) {
             val step = 0.9 * spd * dt
+            val th0 = theta
             theta = if (abs(thetaT - theta) <= step) thetaT else theta + step * Math.signum(thetaT - theta)
+            // the walker reaches θ = π: e^{iπ} = −1 — the identity rings
+            if ((th0 < PI - 1e-9 && theta >= PI - 1e-9) || (th0 > PI + 1e-9 && theta <= PI + 1e-9)) Sfx.play(Sfx.CHIME, 0.65f, 1f, O3.x / 0.9f)
             if (theta == thetaT) { walking = false; playSeries() }
         }
         val full = chainFull()
-        if (chainPlay) { chainN = min(full.toFloat(), chainN + 2.5f * spd * dt); if (chainN >= full) chainPlay = false }
+        if (chainPlay) {
+            val n0 = floor(chainN)
+            chainN = min(full.toFloat(), chainN + 2.5f * spd * dt); if (chainN >= full) chainPlay = false
+            // one more term (iθ)ᵏ/k! of the series snaps onto the chain: a quiet tick, rising with k
+            if (floor(chainN) > n0) Sfx.play(Sfx.TICK, 0.2f, 0.8f + 0.06f * floor(chainN), O3.x / 0.9f)
+        }
         else chainN = full.toFloat()
         val sums = Euler.partialSums(theta, N_CHAIN)
         // zoom: the chain must fit the pane (it swings out to |S| ≈ 4 at π, ≈ 80 at 2π)

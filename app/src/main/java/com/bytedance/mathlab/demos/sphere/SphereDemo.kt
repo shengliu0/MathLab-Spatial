@@ -33,6 +33,7 @@ import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
 import com.bytedance.mathlab.lab.LessonStep
 import com.bytedance.mathlab.lab.Q
+import com.bytedance.mathlab.lab.Sfx
 import com.bytedance.mathlab.lab.SpecDemo
 import com.bytedance.mathlab.lab.TapTarget
 import com.bytedance.mathlab.lab.tr
@@ -181,7 +182,11 @@ object SphereDemo : SpecDemo() {
     private fun resetState() {
         latDeg = 55f; hCm = 2.0f; level = 0f; levelT = 0f; vol = 0f; volT = 0f; speed = 1
         maxLatShown = 0f; builtKey = ""; waterLevelShown = -1; shadowLit = -1; yDrag = 0f; tiltNow = -1f
+        sLevel = 0f; sVol = 0f
     }
+    // sound: last frame's level / pour (transitions only)
+    private var sLevel = 0f
+    private var sVol = 0f
 
     val bandVisible get() = level <= 1.0005f
     private val hBand get() = hCm / 100f
@@ -525,6 +530,15 @@ object SphereDemo : SpecDemo() {
             level = if (levelT > level) min(levelT, level + step) else max(levelT, level - step)
         }
         if (dt > 0f && vol != volT) { val st = dt * spd / VOL_DUR; vol = if (volT > vol) min(volT, vol + st) else max(volT, vol - st) }
+        // sound: a stage of the construction ARRIVES (only on the frame the animation lands)
+        if (level != sLevel && level == levelT && level == floor(level)) when (level.toInt()) {
+            1 -> Sfx.play(Sfx.POP, 0.5f, 1.0f, O.x / 0.9f)            // all 12 bands land on the cylinder (same areas)
+            2 -> Sfx.play(Sfx.POP, 0.5f, 1.15f, RECT.x / 0.9f)        // the side is unrolled flat: 2πr × 2r
+            3 -> Sfx.play(Sfx.CHIME, 0.6f, 1f, RECT.x / 0.9f)         // four shadow discs: 4πr² = 4 × πr²
+            else -> Sfx.play(Sfx.POP, 0.4f, 0.85f, O.x / 0.9f)        // bands back on the sphere
+        }
+        if (sVol < 1f && vol >= 1f) Sfx.play(Sfx.GLASS, 0.6f, 1f, O.x / 0.9f)   // the poured sphere fills exactly 2/3 of the cylinder
+        sLevel = level; sVol = vol
 
         layoutBand()
         layoutRings()

@@ -39,6 +39,7 @@ import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
 import com.bytedance.mathlab.lab.LessonStep
 import com.bytedance.mathlab.lab.Q
+import com.bytedance.mathlab.lab.Sfx
 import com.bytedance.mathlab.lab.SpecDemo
 import com.bytedance.mathlab.lab.TapTarget
 import com.bytedance.mathlab.lab.spec.Blend
@@ -503,11 +504,15 @@ object FractalDemo : SpecDemo() {
         if (animDir == 0 && targetLevel != level) {
             if (targetLevel > level) { animDir = 1; animK = level + 1; level = animK } else { animDir = -1; animK = level }
             animT = 0f; prepDebris()
+            // a carving step starts: the 7 inner sub-cubes of every cell fly out (or fly back in)
+            Sfx.play(Sfx.WHOOSH, 0.3f, if (animDir > 0) 1.0f + 0.1f * animK else 0.8f, C.x / 0.9f)
         }
         if (animDir != 0) {
             animT += dt * spd / CARVE_S
             if (animT >= 1f) {
                 if (animDir < 0) level = animK - 1
+                // the step is done: a level carved (pop, higher each level: 20, 400, 8000 cubes) / put back (lower)
+                Sfx.play(Sfx.POP, 0.55f, if (animDir > 0) 0.9f + 0.15f * animK else 0.75f, C.x / 0.9f)
                 animDir = 0; animT = 0f
                 hideDebris(); bump()
             }
@@ -516,7 +521,10 @@ object FractalDemo : SpecDemo() {
         // ---- walk-in
         if (diving && level >= 1) {
             zoom *= kotlin.math.exp(dt * spd * 0.36f)
-            if (zoom >= 3f) { zoom = 1f; dives++ }
+            if (zoom >= 3f) {
+                zoom = 1f; dives++
+                Sfx.play(Sfx.WHOOSH, 0.35f, 1.2f, C.x / 0.9f)   // ×3 reached: the corner IS the whole sponge — fell one level deeper
+            }
         }
         if (zoom != zoomShown || level != levelShown) applyLevelAndZoom()
         if (animDir != 0) animateDebris()
@@ -608,8 +616,14 @@ object FractalDemo : SpecDemo() {
             // counting: one copy every COUNT_S seconds while exploded
             if (counting[i] >= 0 && counting[i] < exBase[i].size && g >= 0.98f) {
                 countClock[i] += dt * spd
+                val c0 = counting[i]
                 while (countClock[i] >= COUNT_S && counting[i] < exBase[i].size) { countClock[i] -= COUNT_S; counting[i]++ }
-                if (counting[i] >= exBase[i].size) { counted[i] = true; lastCounted = i; bump() }
+                // one copy counted: a quiet tick, rising as the count climbs (3, 4, 8, 9, 20, 27 copies)
+                if (counting[i] > c0) Sfx.play(Sfx.TICK, 0.2f, 0.8f + 0.9f * counting[i] / 27f, EX_X[i] / 0.9f)
+                if (counting[i] >= exBase[i].size) {
+                    counted[i] = true; lastCounted = i; bump()
+                    Sfx.play(Sfx.POP, 0.5f, 1.1f, EX_X[i] / 0.9f)   // all N copies counted: its dimension D lands on the ruler
+                }
             }
             val cnt = counting[i]
             for (k in exCopies[i].indices) {

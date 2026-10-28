@@ -36,6 +36,7 @@ import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
 import com.bytedance.mathlab.lab.LessonStep
 import com.bytedance.mathlab.lab.Q
+import com.bytedance.mathlab.lab.Sfx
 import com.bytedance.mathlab.lab.SpecDemo
 import com.bytedance.mathlab.lab.TapTarget
 import com.bytedance.mathlab.lab.tr
@@ -186,7 +187,12 @@ object ConicsDemo : SpecDemo() {
         builtKey = ""; boardInit = false; curveMatLevel = -1
         dragAcc = FloatArray(3)
         recompute()
+        sType = null; sLaps = 0
     }
+
+    // sound: previous conic type and completed laps (transitions only)
+    private var sType: ConicType? = null
+    private var sLaps = 0
 
     // ---------------------------------------------------------------- nodes
     private lateinit var unitCyl: MeshData
@@ -507,10 +513,17 @@ object ConicsDemo : SpecDemo() {
         val key = "%.4f/%.5f".format(tiltDeg, dist)
         val flashing = flashT > 0f
         if (flashT > 0f) flashT = max(0f, flashT - dt)
-        if (flashPending) { flashPending = false; flash("Plaque") }
+        if (flashPending) {
+            flashPending = false; flash("Plaque")
+            Sfx.play(Sfx.CHIME, 0.6f)                // the plane snaps parallel to a generator: the parabola knife-edge
+        }
         val changed = key != builtKey
         if (changed) { builtKey = key; recompute(); layoutSheet(); layoutDandelin() }
         if (changed || flashing) layoutCurve()
+        // the slice changes family (circle / ellipse / hyperbola; the parabola chimes above): a pop, higher for larger e
+        val ty = sec.type
+        if (sType != null && ty != sType && ty != ConicType.PARABOLA) Sfx.play(Sfx.POP, 0.45f, 0.8f + 0.15f * ty.ordinal)
+        sType = ty
         val lvl = (flashT / 0.7f * 3f).roundToInt().coerceIn(0, 3)
         if (lvl != curveMatLevel) {
             curveMatLevel = lvl
@@ -534,6 +547,10 @@ object ConicsDemo : SpecDemo() {
             val f = if (b.closed) pathG % 1f else { val g = pathG % 2f; if (g <= 1f) g else 2f - g }
             pNow = pointAtArc(f.toDouble() * primCum.last())
         }
+        // P completes one more lap of the curve (PF1 + PF2 never changed): a quiet tick
+        val lapN = laps.toInt()
+        if (lapN > sLaps) Sfx.play(Sfx.TICK, 0.2f, 1.2f)
+        sLaps = lapN
         layoutP()
         layoutBoard(dt, changed)
         updateReadout()

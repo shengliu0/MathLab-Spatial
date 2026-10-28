@@ -35,6 +35,7 @@ import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
 import com.bytedance.mathlab.lab.LessonStep
 import com.bytedance.mathlab.lab.Q
+import com.bytedance.mathlab.lab.Sfx
 import com.bytedance.mathlab.lab.SpecDemo
 import com.bytedance.mathlab.lab.TapTarget
 import com.bytedance.mathlab.lab.spec.Blend
@@ -527,8 +528,10 @@ object GaltonDemo : SpecDemo() {
         for (i in 0 until POOL) {
             val node = balls[i]
             if (!active[i]) { if (node.visible) node.show(false); continue }
+            val u0 = uRow[i]
             uRow[i] += du
             val u = uRow[i]; val b = bits[i]
+            val hitPeg = u.toInt() > u0.toInt() && u.toInt() <= n          // reached the next row of pegs this frame
             var x: Float; var y: Float
             when {
                 u < 1f -> { x = 0f; val yA = YF - BY; val yB = pegY(0, n) + REST; y = yA + (yB - yA) * u * u }
@@ -550,11 +553,15 @@ object GaltonDemo : SpecDemo() {
                     if (t >= 1f) {
                         active[i] = false; node.show(false)
                         counts[k]++; landed++; landedEver++; stacksDirty = true
+                        // the ball drops onto its bin's stack: a soft small click, panned to the bin
+                        Sfx.play(Sfx.CLACK, 0.15f, 1.7f, (BX + binX(k, n)) / 0.9f)
                         continue
                     }
                 }
             }
             node.show(true); node.at(x, y, 0f)
+            // a ball on a peg (one coin flip): a tiny tick, very quiet (many balls at once merge), higher further down
+            if (hitPeg) Sfx.play(Sfx.TICK, 0.12f, 0.9f + 0.5f * u.toInt() / n, (BX + x) / 0.9f)
         }
         if (stacksDirty) refreshStacks()
     }

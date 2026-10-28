@@ -35,6 +35,7 @@ import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
 import com.bytedance.mathlab.lab.LessonStep
 import com.bytedance.mathlab.lab.Q
+import com.bytedance.mathlab.lab.Sfx
 import com.bytedance.mathlab.lab.SpecDemo
 import com.bytedance.mathlab.lab.TapTarget
 import com.bytedance.mathlab.lab.spec.Blend
@@ -511,8 +512,31 @@ object CollisionsDemo : SpecDemo() {
 
     private fun rewriteChords() { for (c in 0 until CH_CHUNKS) dirty[c] = true; for (i in 0 until drawn) writeChord(i) }
 
+    // ---- sound: one CLACK per real collision (3Blue1Brown's clacks), only while the run plays live in update()
+    // (finishNow() — review renders / the opening state — jumps silently). Bursts at large ratios become a buzz
+    // (Sfx merges same-name calls < 18 ms apart on device).
+    /** Clacks requested in the current run, in event order (== the core's collision count when the run ends). */
+    var runClacks = 0L; private set
+    /** Test hook: the kind (1 = blocks, 2 = wall) of every clack requested, in order; null = not logged. */
+    internal var clackLog: MutableList<Int>? = null
+    private var audible = false
+
+    private fun clack(kind: Int, s: BlockSim) {
+        runClacks++
+        clackLog?.add(kind)
+        val loud = if (nTotal <= 40) 0.6f else 0.3f                 // rare hits louder, the burst calmer
+        if (kind == 1) {
+            // block–block collision: a touch higher than the wall, panned to where the blocks meet
+            Sfx.queue(Sfx.CLACK, loud, 1.18f, (WALL_X + s.x2.toFloat()) / 0.9f)
+        } else {
+            // small block hits the wall: base pitch, from the wall's side
+            Sfx.queue(Sfx.CLACK, loud, 0.95f, WALL_X / 0.9f)
+        }
+    }
+
     private fun onEvent(kind: Int) {
         val s = sim ?: return
+        if (audible) clack(kind, s)
         if (kind == 2) flashWallT = FLASH_S else flashBlockT = FLASH_S
         pulse = 1f
         val p = Collisions.phase(s.ratio, s.vs, s.vb, V0)
@@ -548,6 +572,7 @@ object CollisionsDemo : SpecDemo() {
     fun launch() {
         sim = BlockSim(ratio(), W1, X1, X2, V0)
         state = Run.RUNNING; shownCount = 0L; doneT = 0f; slow = 1f; keepResult = false
+        runClacks = 0L; clackLog?.clear()
         clearChords()
         prevX = -1.0; prevY = 0.0; curX = -1.0; curY = 0.0
         bump()
@@ -581,10 +606,16 @@ object CollisionsDemo : SpecDemo() {
         if (s != null && state != Run.READY) {
             val want = dt * RATE[speed]
             val t0 = s.t
+            audible = true
             s.advance(s.t + want, capFor()) { onEvent(it) }
+            audible = false
             if (want > 0f) slow += ((((s.t - t0) / want).toFloat().coerceIn(0f, 1f)) - slow) * min(1f, dt * 6f)
             shownCount = s.count
-            if (state == Run.RUNNING && s.done) markDone(s)
+            if (state == Run.RUNNING && s.done) {
+                markDone(s)
+                // the final count is reached (3, 31, 314 … = π's digits): a bell over the last clack
+                Sfx.play(Sfx.CHIME, 0.7f)
+            }
             if (state == Run.DONE) {
                 doneT += dt
                 if ((s.x2 > TRACK_END && doneT > 1f) || doneT > 25f) respawn()

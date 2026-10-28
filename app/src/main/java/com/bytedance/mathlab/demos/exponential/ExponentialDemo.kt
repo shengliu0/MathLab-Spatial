@@ -37,6 +37,7 @@ import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
 import com.bytedance.mathlab.lab.LessonStep
 import com.bytedance.mathlab.lab.Q
+import com.bytedance.mathlab.lab.Sfx
 import com.bytedance.mathlab.lab.SpecDemo
 import com.bytedance.mathlab.lab.TapTarget
 import com.bytedance.mathlab.lab.spec.Blend
@@ -260,7 +261,20 @@ object ExponentialDemo : SpecDemo() {
         r0 = 1.5f; spreadG = Spread.GENERATIONS.toFloat(); spreadPlay = false; lastR0 = -1f; tree = emptyList()
         dragAcc = 0f; dragI0 = 0; dragL0 = 0L; dragF0 = 0f; clock = 0f
         decalKey.clear(); textMats.clear()
+        sndArmed = false
     }
+
+    // ================================================================ sound (fired on state transitions, see each station)
+    private var sndArmed = false
+    private val sGrow = FloatArray(65)
+    private val sBar = FloatArray(Race.N_MAX + 1)
+    private val sTie = BooleanArray(2)
+    private var sGate = false
+    private var sLayers = -1
+    private var sPlay3 = false
+    private var sCompN = -2L
+    private var sGen = -1
+    private var sPlay4 = false
 
     // ================================================================ nodes
     private lateinit var unitBox: MeshData
@@ -623,6 +637,7 @@ object ExponentialDemo : SpecDemo() {
         poolGlow.at(when (station) { 0 -> BX; 1 -> -0.05f; 2 -> -0.10f; else -> X4 }, PLINTH_Y + 0.019f, 0f)
         updateReadout()
         updateLabels()
+        sndArmed = true
     }
 
     // ---------------------------------------------------------------- ①
@@ -645,6 +660,17 @@ object ExponentialDemo : SpecDemo() {
         for (n in 1..64) grow[n] = approach(grow[n], if (n <= shown + 1e-3f) 1f else 0f, spd / 0.55f, dt)
         morph1 = approach(morph1, if (log1) 1f else 0f, spd / 0.8f, dt)
         val m = sm(morph1)
+        if (sndArmed) for (n in 1..64) if (sGrow[n] < 0.98f && grow[n] >= 0.98f) {
+            val pan = sqX(n) / 0.9f
+            // a square's rice has landed: a grain tick, higher for later squares (bursts merge into a patter)
+            Sfx.play(Sfx.TICK, 0.2f, 0.7f + 1.3f * n / 64f, pan)
+            // the first column too tall for the volume hits the glowing ceiling (linear view only)
+            if (m < 0.5f && clipped(n) && !clipped(n - 1)) Sfx.play(Sfx.THUD, 0.55f, 1f, pan)
+            // the column passes a new landmark (hand, person, tower, Everest, Moon, Sun)
+            val lm = Rice.passed(n)
+            if (lm != null && lm !== Rice.passed(n - 1)) Sfx.play(Sfx.CHIME, 0.45f, 0.8f + 0.1f * Rice.LANDMARKS.indexOf(lm), pan)
+        }
+        for (n in 1..64) sGrow[n] = grow[n]
         // grains (squares 1..8, true scale): they rain in, square by square
         val showGrains = m < 0.5f
         for (gr in grains) {
@@ -723,6 +749,9 @@ object ExponentialDemo : SpecDemo() {
             if (autoT2 >= 0.7f) { autoT2 = 0f; if (raceN < Race.N_MAX) raceN++ else auto2 = false }
         }
         for (n in 1..Race.N_MAX) barGrow[n] = approach(barGrow[n], if (n <= raceN) 1f else 0f, spd / 0.45f, dt)
+        // the next round of the race is in: a quiet tick, higher for bigger n
+        if (sndArmed) for (n in 1..Race.N_MAX) if (sBar[n] < 0.98f && barGrow[n] >= 0.98f) Sfx.play(Sfx.TICK, 0.2f, 0.8f + 0.8f * n / Race.N_MAX, x2(n) / 0.9f)
+        for (n in 1..Race.N_MAX) sBar[n] = barGrow[n]
         scaleL = approach(scaleL, log2Max(raceN).toFloat(), spd * 2.2f, dt)
         morph2 = approach(morph2, if (log2) 1f else 0f, spd / 0.8f, dt)
         val m = sm(morph2)
@@ -769,11 +798,15 @@ object ExponentialDemo : SpecDemo() {
         for (i in 0 until 2) {
             val n = tl.getOrNull(i); val on = n != null && barGrow[n] > 0.95f
             ties[i].show(on)
+            if (sndArmed && on && !sTie[i] && n != null) Sfx.play(Sfx.POP, 0.4f, 1f, x2(n) / 0.9f)   // 2ⁿ ties nᵏ here
+            sTie[i] = on
             if (on && n != null) ties[i].at(x2(n), max(tops[1][n], tops[2][n]) + 0.03f, 0.03f)
         }
         val n0 = Race.foreverFrom(polyK)
         val gOn = raceN >= n0 && barGrow[n0] > 0.95f
         gate.show(gOn); gateTxt.show(gOn)
+        if (sndArmed && gOn && !sGate) Sfx.play(Sfx.CHIME, 0.55f, 1f, (x2(n0) - DX2 / 2) / 0.9f)   // 2ⁿ takes the lead for good
+        sGate = gOn
         if (gOn) {
             val gx = x2(n0) - DX2 / 2
             gate.span(gx, Y2, 0.03f, gx, Y2 + H2 * 0.80f, 0.03f, 0.0018f)
@@ -799,6 +832,15 @@ object ExponentialDemo : SpecDemo() {
             }
         }
         val playing = yearPlay || yearT < 1f
+        val nLayers = ls.count { it.t <= yearT + 1e-6 }
+        val bal0 = ls.lastOrNull { it.t <= yearT + 1e-6 }?.hi ?: 1.0
+        if (sndArmed && playing && compN == sCompN && nLayers > sLayers)
+            Sfx.play(Sfx.TICK, 0.15f, 0.8f + 0.5f * ((bal0 - 1.0) / 1.72).toFloat(), x3(yearT) / 0.9f)   // an interest instalment is paid
+        if (sndArmed && sPlay3 && !yearPlay && yearT >= 1f) {
+            if (compN == Compound.CONTINUOUS) Sfx.play(Sfx.CHIME, 0.55f, 1f, X3_E / 0.9f)              // the year ends exactly on e
+            else Sfx.play(Sfx.POP, 0.5f, 0.9f + 0.1f * ln(compN.toDouble() + 1).toFloat() / 2f, X3_E / 0.9f)   // year-end balance (1+1/n)ⁿ
+        }
+        sLayers = nLayers; sPlay3 = yearPlay; sCompN = compN
         cursor.show(playing)
         val cx = x3(yearT)
         if (playing) cursor.span(cx, Y3, D3 / 2 + 0.006f, cx, Y3 + S3 * 2.9f, D3 / 2 + 0.006f, 0.0018f)
@@ -849,6 +891,17 @@ object ExponentialDemo : SpecDemo() {
     private fun update4(dt: Float) {
         if (spreadPlay) { spreadG += dt * spd / 0.7f; if (spreadG >= Spread.GENERATIONS) { spreadG = Spread.GENERATIONS.toFloat(); spreadPlay = false } }
         if (r0 != lastR0) { lastR0 = r0; layoutTree() }
+        val gen = spreadG.toInt()
+        if (sndArmed && spreadPlay && sGen >= 0 && gen > sGen && gen < tree.size) {
+            // a new generation of cases appears: louder when there are more (expected R0^g)
+            val e = Spread.expected(r0.toDouble(), gen).toFloat()
+            Sfx.play(Sfx.POP, (0.2f + 0.08f * e).coerceAtMost(0.6f), 0.8f + 0.08f * gen, X4 / 0.9f)
+        }
+        if (sndArmed && sPlay4 && !spreadPlay) {
+            // the run ends: R0 < 1 dies out (the total converges to 1/(1−R0)) / R0 > 1 explodes
+            if (r0 < 1f) Sfx.play(Sfx.CHIME, 0.5f, 1f, X4 / 0.9f) else if (r0 > 1f) Sfx.play(Sfx.THUD, 0.5f, 1f, X4 / 0.9f)
+        }
+        sGen = gen; sPlay4 = spreadPlay
         var k = 0
         for ((g, gen) in tree.withIndex()) {
             val grow = (spreadG - g + 1f).coerceIn(0f, 1f)

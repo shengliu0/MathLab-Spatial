@@ -30,6 +30,7 @@ import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
 import com.bytedance.mathlab.lab.LessonStep
 import com.bytedance.mathlab.lab.Q
+import com.bytedance.mathlab.lab.Sfx
 import com.bytedance.mathlab.lab.SpecDemo
 import com.bytedance.mathlab.lab.TapTarget
 import com.bytedance.mathlab.lab.tr
@@ -207,6 +208,7 @@ object AlgebraDemo : SpecDemo() {
         explode1 = false; abOut.fill(false); stage2 = 0; explode3 = false; lifted = -1; seen.fill(false); peel4 = false
         e1 = 0f; abV.fill(0f); cutV = 0f; m2 = 0f; drag2 = false; e3 = 0f; liftV.fill(0f); e4 = 0f
         cubeRot = CUBE_ROT0; knobHeld = false
+        sndArmed = false
         for (st in 0..3) { sc[st] = fitScale(st); ox[st] = fitOrigin(st, 0f) }
         dragAcc = 0f; dragA0 = aT; dragB0 = bT; dragN0 = n4; stepA0 = aT; stepB0 = bT
     }
@@ -509,6 +511,7 @@ object AlgebraDemo : SpecDemo() {
         e3 = ap(e3, if (explode3) 1f else 0f)
         for (i in 0 until 8) liftV[i] = ap(liftV[i], if (lifted == i) 1f else 0f)
         e4 = ap(e4, if (peel4) 1f else 0f)
+        sounds()
         // zoom: ease every station toward its fit, except while a knob is held (then the scale stays put)
         if (!knobHeld) for (st in 0..3) {
             sc[st] = ap(sc[st], fitScale(st))
@@ -524,6 +527,38 @@ object AlgebraDemo : SpecDemo() {
         liftTag.show(station == 2 && lifted >= 0 && liftV[lifted] > 0.6f)
         updateReadout()
         updateLabels()
+    }
+
+    // ---------------------------------------------------------------- sound (events = settled moves of the pieces)
+    private var sndArmed = false
+    private val sAb = FloatArray(2)
+    private var sM2 = 0f; private var sCut = 0f; private var sE4 = 0f; private var sLift = 0f; private var sLifted = -1
+    private var sA = 0L; private var sB = 0L; private var sN = 0; private var sSeenAll = false
+
+    private fun sounds() {
+        val liftNow = if (lifted >= 0) liftV[lifted] else 0f
+        val seenAll = seen.all { it }
+        if (sndArmed) {
+            val pan = (ox[station] + 0.2f) / 0.9f
+            for (i in 0..1) if (!abOut[i] && sAb[i] > 0.03f && abV[i] <= 0.03f)
+                Sfx.play(Sfx.POP, 0.45f, 1.0f, pan)                       // an ab rectangle snaps back: the square is whole again
+            if (stage2 >= 1 && sCut < 0.97f && cutV >= 0.97f)
+                Sfx.play(Sfx.TICK, 0.3f, 1.3f, pan)                      // the b² corner is cut away
+            if (stage2 >= 2 && sM2 < 0.97f && m2 >= 0.97f)
+                Sfx.play(Sfx.POP, 0.6f, 1.15f, pan)                      // the strip seats: L = (a+b)(a−b) rectangle
+            if (lifted >= 0 && lifted == sLifted && sLift < 0.95f && liftNow >= 0.95f)
+                Sfx.play(Sfx.POP, 0.35f, 0.9f + 0.1f * blocks[lifted].nb, (C3.x) / 0.9f)   // a cube block lifted clear
+            if (peel4 && sE4 < 0.97f && e4 >= 0.97f)
+                Sfx.play(Sfx.POP, 0.4f, 1.1f, pan)                        // the square has peeled into n L-layers
+            if (knobHeld && (aT != sA || bT != sB || n4 != sN)) {
+                // a ruler knob steps one 0.1 grid (or one n): a quiet tick, higher for a bigger value
+                val f = when { n4 != sN -> n4.toFloat() / Algebra.N_MAX; aT != sA -> aT.toFloat() / Algebra.A_MAX; else -> bT.toFloat() / Algebra.B_MAX }
+                Sfx.play(Sfx.TICK, 0.15f, 0.8f + 0.6f * f, pan)
+            }
+            if (seenAll && !sSeenAll) Sfx.play(Sfx.CHIME, 0.6f)          // all 8 cube blocks identified: 1-3-3-1
+        }
+        sAb[0] = abV[0]; sAb[1] = abV[1]; sM2 = m2; sCut = cutV; sE4 = e4; sLift = liftNow; sLifted = lifted
+        sA = aT; sB = bT; sN = n4; sSeenAll = seenAll; sndArmed = true
     }
 
     private val aM get() = aT / 10f
