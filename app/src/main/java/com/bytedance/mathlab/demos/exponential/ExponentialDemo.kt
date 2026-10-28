@@ -31,6 +31,7 @@ import com.bytedance.mathlab.core.exponential.Race
 import com.bytedance.mathlab.core.exponential.Rice
 import com.bytedance.mathlab.core.exponential.Spread
 import com.bytedance.mathlab.lab.BakeCache
+import com.bytedance.mathlab.lab.About
 import com.bytedance.mathlab.lab.Bi
 import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
@@ -1204,6 +1205,34 @@ object ExponentialDemo : SpecDemo() {
     }
 
     // ================================================================ guided track (导学)
+
+    // ---- background card (📖): context for a viewer who has never met this topic
+    override val about = About(listOf(
+        About.Page(
+            Bi("这个实验在做什么？", "What is this experiment?"),
+            Bi("四个站（右侧四块牌切换）：① 真实比例的米粒棋盘，每格米翻倍；② n、n²、2ⁿ 三根柱子赛跑；③ 存钱复利，一年分几次付息；④ 一个病例传给 R0 个人，一代代扩散。捏发光的“下一格”或拖小球把手往前走；捏「lin | log」牌在普通刻度和对数刻度间切换。", "Four stations (switch with the plaques on the right): 1) a rice chessboard at true scale, doubling on every square; 2) a race between n, n² and 2ⁿ; 3) compound interest, paid in more and more instalments a year; 4) an infection where each case passes it to R0 people. Pinch the glowing 'next square' or drag the ball knobs to step on; pinch the 'lin | log' plaque to switch to a log scale."),
+        ),
+        About.Page(
+            Bi("国王的米", "The king's rice"),
+            Bi("传说国际象棋的发明者向国王讨赏：第 1 格放 1 粒米，第 2 格 2 粒，以后每格翻倍。国王笑着答应，结果全国粮仓都不够。这是传说，但算术是真的。1683 年，雅各布·伯努利研究复利，发现付息次数越多，结果越逼近一个固定的数，后来记作 e ≈ 2.718。", "A legend says the inventor of chess asked a king for 1 grain of rice on the first square, 2 on the second, doubling each time. The king laughed and agreed, and his granaries ran dry. It is a legend, but the arithmetic is real. In 1683 Jacob Bernoulli, studying compound interest, found that paying interest more and more often approaches a fixed limit, later called e ≈ 2.718."),
+        ),
+        About.Page(
+            Bi("核心：加 vs 乘", "Key idea: add vs multiply"),
+            Bi("线性增长每一步“加”同样多，指数增长每一步“乘”同样的倍数。一开始看不出差别，后来天差地别。想象一张 0.1 毫米厚的纸，每对折一次厚度翻倍：折 10 次约 10 厘米，折 42 次就超过地球到月球的距离。我们的直觉习惯按“加”来想，所以总会低估翻倍。", "Linear growth adds the same amount each step; exponential growth multiplies by the same factor. At first you can't tell them apart; later they are worlds apart. Picture paper 0.1 mm thick that doubles with every fold: 10 folds make about 10 cm, and 42 folds would reach past the Moon. Our intuition thinks in 'add', so it always underestimates doubling."),
+        ),
+        About.Page(
+            Bi("怎么看这个 3D 场景", "How to read the 3-D scene"),
+            Bi("① 白色小颗粒 = 真实大小的米粒；米柱从米白、金、橙、红变到紫，表示格子越来越靠后；柱顶发光的“天花板”加箭头 = 太高画不下，读数给出真实高度。② 蓝柱 = n，绿柱 = n²，橙柱 = 2ⁿ。③ 一层层绿色 = 每次付的利息，粉色横线 = e。④ 小球 = 病例，由黄变红 = 第几代，连线 = 谁传给了谁。", "1) White specks = real-size rice grains; columns shift from cream to gold, orange, red and purple as the square number climbs; a glowing ceiling with an arrow = too tall to draw, and the readout gives the true height. 2) Blue bar = n, green = n², orange = 2ⁿ. 3) Each green layer = one interest payment; the pink line = e. 4) Balls = cases, yellow to red by generation; lines = who infected whom."),
+        ),
+        About.Page(
+            Bi("一个关键数字", "One number to remember"),
+            Bi("第 20 格已有 52 万多粒米（约 13 千克），米柱 4.2 米高；可前 13 格加起来才 0.2 千克。第 64 格是 2⁶³ ≈ 9.2×10¹⁸ 粒，约等于全世界 440 年的大米产量。换成对数刻度，这条爆炸的曲线变成一道笔直的斜坡：每格都 ×2，每级台阶一样高。", "Square 20 already holds over 520,000 grains (about 13 kg), a column 4.2 m tall, while squares 1 to 13 together hold just 0.2 kg. Square 64 holds 2⁶³ ≈ 9.2 × 10¹⁸ grains, about 440 years of the world's rice harvest. On a log scale the explosion becomes a straight ramp: every square is ×2, so every step is the same height."),
+        ),
+        About.Page(
+            Bi("今天在哪里？", "Where is it today?"),
+            Bi("信用卡欠款和存款利息都按复利滚动。疫情里 R0 大于 1 就越滚越大，小于 1 就自己熄灭 —— 这就是“压低传播”的意义。芯片上的晶体管数几十年来大约每两年翻一番（摩尔定律）。反过来，放射性原子每过一个半衰期减半，碳-14 测年就靠它。", "Card debt and savings grow by compound interest. In an epidemic, R0 above 1 snowballs and below 1 burns out on its own, which is why slowing the spread matters. Transistors on a chip roughly doubled every two years for decades (Moore's law). Run backwards, radioactive atoms halve every half-life, and carbon-14 dating relies on it."),
+        ),
+    ))
 
     override val lesson: Lesson by lazy {
         Lesson(

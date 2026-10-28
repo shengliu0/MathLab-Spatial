@@ -27,6 +27,7 @@ import com.bytedance.mathlab.core.P3
 import com.bytedance.mathlab.core.euler.Complex
 import com.bytedance.mathlab.core.euler.Euler
 import com.bytedance.mathlab.lab.BakeCache
+import com.bytedance.mathlab.lab.About
 import com.bytedance.mathlab.lab.Bi
 import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
@@ -1073,6 +1074,34 @@ object EulerDemo : SpecDemo() {
     // ================================================================ guided track (导学)
 
     private var turnsBase = 0
+
+    // ---- background card (📖): context for a viewer who has never met this topic
+    override val about = About(listOf(
+        About.Page(
+            Bi("这个实验在做什么？", "What is this experiment?"),
+            Bi("三个站（右侧牌切换）。① 螺旋：一个点沿发光螺旋往纵深跑，地面和侧墙上是它的影子；拖 ω、σ 把手改转速和衰减，捏时间轴末端换视角。② 乘法：拖蓝色 z 和红色 w，看黄色 z·w 落在哪；捏绿色「×i」牌把 z 转 90°。③ e^iπ：拖单位圆上的金点走半圈，看一串箭头盘旋着落到 −1。", "Three stations (plaques on the right). 1) Helix: a point runs along a glowing helix into depth, casting shadows on floor and side wall; the ω and σ knobs set spin and decay; pinch the time-axis end to change view. 2) Multiplication: drag blue z and red w, see where yellow z·w lands; the green 'x i' plaque turns z by 90°. 3) e^iπ: walk the gold point half way round the unit circle; a chain of arrows spirals onto −1."),
+        ),
+        About.Page(
+            Bi("先认识复数", "First: complex numbers"),
+            Bi("没有哪个普通的数平方后等于 −1。16 世纪，意大利的卡尔达诺、邦贝利解三次方程时，中途不得不用 √−1，最后却得到正确的实数答案。笛卡儿嫌弃地叫它“虚数”。约 1800 年，韦塞尔、阿尔冈等人看出：把 a + bi 画成平面上的一点（向右 a、向上 b），一切就清楚了。i 就是“向上一格”。", "No ordinary number squares to −1. In the 1500s Cardano and Bombelli in Italy, solving cubic equations, had to pass through √−1 midway, yet still reached correct real answers. Descartes dismissively called such numbers 'imaginary'. Around 1800 Wessel, Argand and others saw the fix: draw a + bi as a point in a plane, a to the right and b up. Then i is simply 'one step up'."),
+        ),
+        About.Page(
+            Bi("核心：乘法就是旋转", "Key idea: multiplying is turning"),
+            Bi("复数相乘：长度相乘，角度相加。乘 i 就是逆时针转直角；乘两次转 180°，所以 i² = −1。1748 年欧拉写出 e^(iθ) = cos θ + i sin θ。想象用绳子甩小球：速度总垂直于绳子，球只转圈不飞远。e^(iθ) 也是“侧着长”，于是沿单位圆走了 θ 那么远。", "Multiply two complex numbers: lengths multiply, angles add. Times i is a quarter turn counter-clockwise; twice is 180°, so i² = −1. In 1748 Euler wrote e^(iθ) = cos θ + i sin θ. Think of whirling a ball on a string: its velocity is always at right angles to the string, so it circles instead of flying off. e^(iθ) grows 'sideways' the same way, walking a distance θ round the unit circle."),
+        ),
+        About.Page(
+            Bi("怎么看这个 3D 场景", "How to read the 3-D scene"),
+            Bi("① 正对你的平面 = 复平面（右实部、上虚部），纵深 = 时间。黄螺旋 = e^(iωt)，蓝色地面影子 = cos ωt，红色墙上影子 = sin ωt。② 蓝箭头 = z，红 = w，黄 = z·w；彩色圆弧 = 角度相加；金色网格 = 整个平面乘以 w。③ 白圈 = 单位圆，金点 = e^(iθ)；彩色箭头链 = 级数各项，每支比上一支转 90°。", "1) The plane facing you = the complex plane (right = real, up = imaginary); depth = time. Yellow helix = e^(iωt); the blue floor shadow = cos ωt, the red wall shadow = sin ωt. 2) Blue arrow = z, red = w, yellow = z·w; coloured arcs = angles adding; the gold grid = the whole plane multiplied by w. 3) White ring = unit circle, gold point = e^(iθ); the blue, green, red, purple arrow chain = the series' terms, each turned 90° from the last."),
+        ),
+        About.Page(
+            Bi("一个关键等式", "One key equation"),
+            Bi("θ = π 时，沿单位圆走 π 的弧长正好半圈，落在 −1：e^(iπ) + 1 = 0。它把 0、1、π、e、i 这五个最重要的数连在一起。常见误解：“虚数是假的、没用的”。“虚”只是历史留下的名字。复数和负数一样真实：负数表示“反方向”，复数表示“转一个角度”。", "At θ = π, an arc of length π is exactly half a turn and lands on −1: e^(iπ) + 1 = 0. It ties together five of maths' most important numbers: 0, 1, π, e and i. A common misconception: 'imaginary numbers are fake and useless'. The name is just history. Complex numbers are as real as negatives: a negative means 'the opposite way', a complex number means 'turned by an angle'."),
+        ),
+        About.Page(
+            Bi("今天在哪里？", "Where is it today?"),
+            Bi("我国的交流电每秒转 50 圈，电气工程师就用旋转的复数算电压和电流。手机通话、Wi-Fi、MP3、JPEG 都靠傅里叶变换：把信号拆成许多以不同速度转圈的 e^(iωt)。量子力学的波函数本身就是复数。一个旋转的圆从侧面看就是波 —— 世上的振动和波，几乎都能这样描述。", "Mains power in China cycles 50 times a second, and engineers compute voltages and currents with rotating complex numbers. Phone calls, Wi-Fi, MP3 and JPEG rely on the Fourier transform, which splits a signal into many e^(iωt) spinning at different speeds. Quantum wavefunctions are complex numbers. A turning circle seen side-on is a wave, and almost every vibration and wave can be described this way."),
+        ),
+    ))
 
     override val lesson: Lesson by lazy {
         Lesson(

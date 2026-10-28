@@ -29,6 +29,7 @@ import com.bytedance.mathlab.core.P3
 import com.bytedance.mathlab.core.collisions.BlockSim
 import com.bytedance.mathlab.core.collisions.Collisions
 import com.bytedance.mathlab.lab.BakeCache
+import com.bytedance.mathlab.lab.About
 import com.bytedance.mathlab.lab.Bi
 import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
@@ -744,6 +745,34 @@ object CollisionsDemo : SpecDemo() {
     // ================================================================ guided track (导学)
 
     private var base = 0
+
+    // ---- background card (📖): context for a viewer who has never met this topic
+    override val about = About(listOf(
+        About.Page(
+            Bi("这个实验在做什么？", "What is this experiment?"),
+            Bi("一条发光轨道，左边是墙。棕色小方块（1 千克）停在墙前，蓝色大方块从右边滑过来。捏大方块发射，金色计数器数一共撞了几次。捏质量比牌，让大块重 1 倍、100 倍、1 万倍……直到 100 亿倍。后面的相空间板（捏它右上角的小牌打开）用一个圆把整个过程画出来。", "A glowing track with a wall on the left. A small brown block (1 kg) waits in front of the wall; a big blue block slides in from the right. Pinch the big block to launch it, and the gold counter counts every collision. Pinch the ratio plaque to make the big block 1, 100, 10,000 ... up to 10 billion times heavier. The phase board behind (pinch the tab at its top right) draws the whole run with a circle."),
+        ),
+        About.Page(
+            Bi("撞出来的 π", "Pi from collisions"),
+            Bi("2003 年，数学家加尔佩林发表了一个奇怪的发现：在理想情况下（没有摩擦、碰撞不损失能量），质量比为 1、100、1 万、100 万时，总碰撞次数是 3、31、314、3141 —— 正是 π 的数字！2019 年 3Blue1Brown 的视频让它广为人知。方块明明是方的，π 从哪来？", "In 2003 the mathematician Gregory Galperin published a strange discovery: in an ideal world (no friction, no energy lost in collisions), mass ratios of 1, 100, 10,000 and a million give 3, 31, 314 and 3,141 collisions in total: the digits of π! A 2019 3Blue1Brown video made it famous. The blocks are square, so where does π come from?"),
+        ),
+        About.Page(
+            Bi("先认识：两条守恒律", "First: two conservation laws"),
+            Bi("碰撞中有两样东西总量不变。能量：和速度的平方有关，完全弹性碰撞不损失。动量：质量 × 速度，两块相撞时总量不变（撞墙时墙会吸走动量，所以只在块与块之间守恒）。把速度乘上 √质量 再画图，“能量不变”就变成“状态点永远在一个圆上”。π 就藏在这个圆里。", "Two totals matter in these collisions. Energy depends on speed squared and is not lost in a perfectly elastic bounce. Momentum, mass × velocity, is kept when the blocks hit each other (the wall soaks up momentum, so only block-block hits keep it). Scale each speed by the square root of its mass, and 'energy is kept' becomes 'the state point always stays on one circle'. That circle is where π hides."),
+        ),
+        About.Page(
+            Bi("核心：在圆上走小步", "Key idea: small steps round a circle"),
+            Bi("每撞一次，状态点沿一条弦跳到圆上另一点。妙的是，这些弦把圆切成一段段相等的弧，每段对应一个小角 θ。从半圈处出发，进入终点区就停，所以次数 = π 里放得下几个 θ。就像绕圆桌迈固定的小步，步子越小，半圈的步数越接近 π ÷ 步长。质量比 100ⁿ 时 θ ≈ 10⁻ⁿ，于是数出 π 的前几位。", "Each collision makes the state point jump along a chord to another point on the circle. Remarkably, the chords cut the circle into equal arcs, each worth a small angle θ. Starting half way round, the run stops once it enters the end zone, so the count is how many θ fit into π. Like walking round a table in fixed small steps: the smaller the step, the closer half a lap is to π ÷ step. For mass ratio 100ⁿ, θ ≈ 10⁻ⁿ, so the count spells π."),
+        ),
+        About.Page(
+            Bi("怎么看这个 3D 场景", "How to read the 3-D scene"),
+            Bi("前面：棕色 = 小方块，蓝色 = 大方块（越重画得越大），碰撞时会闪光；金色大数字 = 碰撞次数，π 里亮起的数字 = 对上了几位。后面的相空间板：横轴 √M·V（蓝），纵轴 √m·v（棕）；金色圆 = 能量守恒；绿色斜线 = 动量守恒；浅色折线 = 每次碰撞的弦，状态点沿它跳。切到「立体」，弦沿纵深排开，绕成螺旋。", "In front: brown = small block, blue = big block (bigger when heavier), flashing at each hit; big gold digits = the count, and the lit digits of π show how many match. On the phase board: across = √M·V (blue), up = √m·v (brown); gold circle = energy kept; green slanted lines = momentum kept; the pale zig-zag = one chord per collision, which the state point hops along. In '3-D' the chords spread out in depth into a coil."),
+        ),
+        About.Page(
+            Bi("关键数字与今天", "The numbers, and today"),
+            Bi("1 : 1 撞 3 次，100 : 1 撞 31 次，10⁴ 撞 314 次……10¹⁰ 撞 314159 次。每多一位 π，质量要再乘 100，碰撞多 10 倍 —— 这不是算 π 的好办法，却是看懂“守恒律就是几何”的好例子。2019 年有物理学家指出，量子计算的 Grover 搜索算法也是同一幅图：在圆上一小步一小步地转。", "1 : 1 gives 3 hits, 100 : 1 gives 31, 10⁴ gives 314 ... 10¹⁰ gives 314,159. Each extra digit needs 100 times the mass and 10 times the collisions: a poor way to compute π, but a great way to see that conservation laws are geometry. In 2019 a physicist pointed out the same picture inside Grover's quantum search algorithm: both turn round a circle in small equal steps."),
+        ),
+    ))
 
     override val lesson: Lesson by lazy {
         Lesson(

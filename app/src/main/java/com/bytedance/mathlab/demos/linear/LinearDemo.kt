@@ -34,6 +34,7 @@ import com.bytedance.mathlab.core.linear.Linear
 import com.bytedance.mathlab.core.linear.LinearPresets
 import com.bytedance.mathlab.core.linear.Mat3
 import com.bytedance.mathlab.core.linear.Vec3
+import com.bytedance.mathlab.lab.About
 import com.bytedance.mathlab.lab.Bi
 import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
@@ -768,6 +769,34 @@ object LinearDemo : SpecDemo() {
     }
 
     // ---------------------------------------------------------------- guided track (导学)
+
+    // ---- background card (📖): context for a viewer who has never met this topic
+    override val about = About(listOf(
+        About.Page(
+            Bi("这个实验在做什么？", "What is this experiment?"),
+            Bi("三维方格网 = 整个空间。三支箭头（红 î、绿 ĵ、蓝 k̂）从原点伸出。捏住箭头尖拖动，整个网格、金色立方体和字母 F 都跟着变形。右边架子上的小立方体是现成的变换：恒等、旋转、剪切、伸缩、投影、镜像、随机、组合，捏一下就播放。紫色探针 v 用来找“不转向”的方向。", "A 3-D grid = all of space. Three arrows (red î, green ĵ, blue k̂) start at the origin. Pinch an arrow tip and drag: the whole grid, the gold cube and the letter F deform with it. The mini-cubes on the right shelf are ready-made transforms: identity, rotate, shear, scale, project, reflect, random, compose; pinch one to play it. The violet probe v hunts for directions that do not turn."),
+        ),
+        About.Page(
+            Bi("矩阵是什么？", "What is a matrix?"),
+            Bi("矩阵就是一张数字表，比如 3 行 3 列。解方程组时人们很早就这样摆数：中国的《九章算术》（约两千年前）就用算筹排成方阵来消元。1858 年，凯莱把矩阵当成能相乘的“对象”来研究。今天更好的理解是：矩阵是一台机器，把空间里每一个点搬到新位置。", "A matrix is a table of numbers, say 3 rows by 3 columns. People laid numbers out this way long ago to solve equations: the Chinese Nine Chapters, about two thousand years old, used counting rods arranged in a grid. In 1858 Arthur Cayley studied matrices as objects you can multiply. Today the best picture is: a matrix is a machine that moves every point of space to a new place."),
+        ),
+        About.Page(
+            Bi("核心：只看三支箭头", "Key idea: watch three arrows"),
+            Bi("“线性”是说：变换后网格线仍是直的、等距的，原点不动。于是任何一点都是一份“配方”：走 x 步 î、y 步 ĵ、z 步 k̂。变换只换了三种“原料”，配方不变。所以只要知道三支箭头落在哪，整个空间就定了 —— 三个落点就是矩阵的三列。行列式 det = 单位立方体的体积变成了几倍。", "'Linear' means grid lines stay straight and evenly spaced, and the origin stays put. So every point is a recipe: x steps of î, y of ĵ, z of k̂. A transform swaps the three ingredients, never the recipe. Know where the three arrows land and you know all of space; those landing points are the matrix's three columns. The determinant, det, is how many times the unit cube's volume grows."),
+        ),
+        About.Page(
+            Bi("怎么看这个 3D 场景", "How to read the 3-D scene"),
+            Bi("红、绿、蓝箭头 = 矩阵的三列。金色立方体 = 单位立方体变形后的样子，头上的数字就是 det；淡白色框 = 原来的立方体，用来比大小。乳白色的 F 用来看朝向：F 成了镜像、立方体变粉 = det < 0。网格压扁成一张发光平面 = det = 0。暖白色发光直线 = 特征方向：只伸缩、不转向。", "Red, green, blue arrows = the matrix's three columns. The gold cube = the unit cube after the transform; the number above it is det. The faint white frame = the original cube, for comparison. The ivory F shows orientation: a mirrored F and a pink cube mean det < 0. The grid flattening into a glowing plane means det = 0. Warm-white glowing lines = eigen-directions, which only stretch and never turn."),
+        ),
+        About.Page(
+            Bi("常见误解", "Common misconceptions"),
+            Bi("det 为负不是“体积小于零”，而是空间翻成了镜像，像左手手套变成右手。det = 0 表示许多点被压到同一处，信息丢了，变换无法撤销（没有逆矩阵）。剪切像推一叠扑克牌：形状歪了，体积不变（det = 1）。还有：先 A 后 B 和先 B 后 A 通常不一样 —— 矩阵乘法讲顺序。", "A negative det is not 'less than zero volume': space has been flipped into its mirror image, like a left glove turning into a right one. det = 0 means many points land on the same spot, information is lost and the map cannot be undone (no inverse). A shear, like pushing a deck of cards, skews the shape but keeps the volume (det = 1). And A then B usually differs from B then A: order matters."),
+        ),
+        About.Page(
+            Bi("今天在哪里？", "Where is it today?"),
+            Bi("你眼前的画面就是矩阵算出来的：头显每一帧都把成千上万个顶点乘上矩阵，让它们随你转头而旋转，再投影到屏幕上。机器人手臂、相机标定、游戏物理都离不开它。神经网络的每一层，核心也是一次矩阵乘法。早期网页搜索的 PageRank 排名，就是一个巨大矩阵的特征向量。", "The picture in front of you is computed with matrices: every frame the headset multiplies thousands of vertices by matrices to turn them with your head and project them onto the display. Robot arms, camera calibration and game physics depend on them too. Each layer of a neural network is, at heart, one matrix multiplication. Google's early PageRank ranking was an eigenvector of a giant matrix."),
+        ),
+    ))
 
     override val lesson: Lesson by lazy {
         Lesson(

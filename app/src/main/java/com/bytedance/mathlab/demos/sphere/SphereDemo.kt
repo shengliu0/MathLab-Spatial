@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.bytedance.mathlab.core.P3
 import com.bytedance.mathlab.core.sphere.Archimedes
 import com.bytedance.mathlab.lab.BakeCache
+import com.bytedance.mathlab.lab.About
 import com.bytedance.mathlab.lab.Bi
 import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
@@ -768,6 +769,34 @@ object SphereDemo : SpecDemo() {
     override fun onDragEnd(name: String) {}
 
     // ---------------------------------------------------------------- guided track (导学)
+    // ---- background card (📖): context for a viewer who has never met this topic
+    override val about = About(listOf(
+        About.Page(
+            Bi("这个实验在做什么？", "What is this experiment?"),
+            Bi("一个玻璃球，表面涂成 12 条等高的彩带，装在一个刚好套住它的玻璃圆柱里（半径 r，高 2r）。拖右边轨道上的金色把手选一条带，圆柱上同色的“双胞胎”同时发光。捏球：12 条带全部投到圆柱上；捏盖子：圆柱侧面展开成长方形；捏左后方的影子：长方形卷成 4 个圆盘。还有一块墓碑可以捏。", "A glass sphere painted with 12 equal-height colour bands, inside a glass cylinder that just fits it (radius r, height 2r). Drag the gold knob on the right rail to pick a band; its same-colour twin on the cylinder lights up. Pinch the sphere: all 12 bands fly onto the cylinder. Pinch the lid: the side unrolls into a rectangle. Pinch the shadow at the back left: the rectangle rolls into 4 discs. There is a tombstone to pinch too."),
+        ),
+        About.Page(
+            Bi("阿基米德的墓碑", "Archimedes' tombstone"),
+            Bi("球面是弯的，没法摊平来量，很长时间没人知道它有多大。约公元前 225 年，阿基米德在《论球与圆柱》里给出答案：球面积是它影子（大圆）的 4 倍，体积是外切圆柱的 2/3。他最得意这个发现，要求墓碑上刻球套圆柱。公元前 75 年，西塞罗在西西里正是凭这幅图找到了他荒废的坟墓。", "A sphere is curved, so you cannot flatten it to measure it, and for ages nobody knew its area. Around 225 BC, in On the Sphere and Cylinder, Archimedes found it: four times its shadow (the great circle), with a volume 2/3 of the cylinder around it. He was so proud that he asked for a sphere in a cylinder on his tomb, and in 75 BC Cicero found the neglected grave in Sicily by that carving."),
+        ),
+        About.Page(
+            Bi("核心：帽盒定理", "Key idea: the hat-box theorem"),
+            Bi("用两把水平的刀把球和圆柱一起切下一圈，两圈面积一模一样（都是 2πrh）。为什么？靠近两极，球面那圈是斜的，所以比圆柱那圈宽；但它离轴更近，一圈更短。宽了多少倍，就短了多少倍，正好抵消。就像把橘子皮水平地“推”到罐头标签上：每小块皮形状变了，面积没变。", "Slice the sphere and cylinder together between two horizontal knives: the two bands have exactly the same area (both 2πrh). Why? Near the poles the sphere's band is tilted, so it is wider than the cylinder's; but it is closer to the axis, so it is shorter around. It is wider by exactly the factor it is shorter. Like pushing orange peel straight out onto a can's label: each piece changes shape, not area."),
+        ),
+        About.Page(
+            Bi("怎么看这个 3D 场景", "How to read the 3-D scene"),
+            Bi("12 条彩带 = 12 个等高的切片；圆柱上同颜色的那条 = 它水平投过去的位置。左边轮廓上的橙色线段 = 带子斜着变宽（×1/cosθ），蓝色线段 = 半径变小（×cosθ），两者相乘等于 1。展开的长方形 = 2πr × 2r。影子 = 大圆 πr²；长方形切成 4 条，每条卷成一个和影子一样大的圆盘。", "12 colour bands = 12 equal-height slices; the same colour on the cylinder = where that band projects straight out. On the left silhouette the orange segment = the band's slant width growing (×1/cosθ), the blue one = its radius shrinking (×cosθ); multiplied, they give 1. The unrolled rectangle = 2πr × 2r. The shadow = the great circle πr²; the rectangle is cut into 4 strips, each rolling into one shadow-sized disc."),
+        ),
+        About.Page(
+            Bi("关键数字：4", "The key number: 4"),
+            Bi("球面积 = 4πr² = 4 个影子。地球半径约 6371 千米，表面积约 5.1 亿平方千米。但要注意：面积可以保住，形状保不住 —— 球面不可能不变形地摊成平面（高斯后来证明了原因）。所以投到圆柱上的地图，靠近两极的国家会被横向拉宽、纵向压扁。", "Sphere area = 4πr² = four shadows. Earth's radius is about 6,371 km, so its surface is about 510 million km². But note: area can be kept, shape cannot. No sphere can be flattened without distortion (Gauss later proved why). So on a map projected onto a cylinder, countries near the poles come out stretched sideways and squashed vertically."),
+        ),
+        About.Page(
+            Bi("今天在哪里？", "Where is it today?"),
+            Bi("阿基米德的投影就是“等积圆柱投影”（兰伯特，1772 年）：画人口、森林分布图时用它，各国面积的比例才是对的。灯泡和太阳的光均匀洒在 4πr² 的球面上，所以离远一倍，亮度只剩四分之一。给球形储罐算油漆、算一颗星球的表面，用的都是这个 4。", "Archimedes' projection is the cylindrical equal-area map (Lambert, 1772): use it for population or forest maps and countries keep their true area ratios. A bulb or the Sun spreads its light over a sphere of area 4πr², so twice as far means a quarter as bright. Paint for a spherical tank, or the surface of a planet: the same factor 4."),
+        ),
+    ))
+
     override val lesson: Lesson by lazy {
         Lesson(
             listOf(

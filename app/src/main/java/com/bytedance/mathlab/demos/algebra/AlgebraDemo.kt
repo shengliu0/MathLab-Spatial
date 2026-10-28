@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.bytedance.mathlab.core.P3
 import com.bytedance.mathlab.core.algebra.Algebra
 import com.bytedance.mathlab.lab.BakeCache
+import com.bytedance.mathlab.lab.About
 import com.bytedance.mathlab.lab.Bi
 import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
@@ -895,6 +896,34 @@ object AlgebraDemo : SpecDemo() {
 
     private fun bothOut() = abOut[0] && abOut[1] && abV[0] > 0.95f && abV[1] > 0.95f
     private fun bothIn() = !abOut[0] && !abOut[1] && abV[0] < 0.05f && abV[1] < 0.05f
+
+    // ---- background card (📖): context for a viewer who has never met this topic
+    override val about = About(listOf(
+        About.Page(
+            Bi("这个实验在做什么？", "What is this experiment?"),
+            Bi("四个“拼图站”（右侧四块小牌切换）：① 边长 a+b 的正方形；② 剪一刀再转一下的 L 形；③ 切成 8 块的立方体；④ 一圈圈 L 形拼成的方阵。捏起小块可以拿出、放回，拖动尺子上的把手改变 a、b、n。头顶的黑板写着对应的公式，两边的读数始终相等。", "Four puzzle stations (switch with the four plaques on the right): 1) a square of side a + b; 2) an L-shape you cut and swing; 3) a cube cut into 8 blocks; 4) a square built from L-shaped layers. Pinch pieces to lift them out or put them back, and drag the knobs on the rulers to change a, b and n. The board overhead shows the formula; both sides of the readout always agree."),
+        ),
+        About.Page(
+            Bi("代数以前的代数", "Algebra before letters"),
+            Bi("用字母写公式其实很晚：16 世纪末的韦达、1637 年的笛卡儿才把它定型。更早的人用图形做代数。欧几里得《几何原本》第二卷（约公元前 300 年）就是靠切拼正方形和长方形来证明这些等式；约公元 820 年，花拉子米解二次方程时，真的是画一个正方形去“配方”。", "Writing formulas with letters is recent: Viete in the late 1500s and Descartes in 1637 made it standard. Before that, people did algebra with shapes. Book II of Euclid's Elements (about 300 BC) proves these identities by cutting and rearranging squares and rectangles, and around 820 AD al-Khwarizmi solved quadratic equations by literally drawing a square and 'completing' it."),
+        ),
+        About.Page(
+            Bi("核心：乘法就是面积", "Key idea: multiplying is area"),
+            Bi("a × b 就是长 a、宽 b 的长方形的面积；a × a × a 就是立方体的体积。一个恒等式说的其实是：同一堆碎片换一种摆法，总面积不变。就像一块蛋糕，不管切成几块、怎么挪，蛋糕总量都一样。所以只要拼法对了，a、b 取什么数都成立。", "a × b is the area of a rectangle a long and b wide; a × a × a is the volume of a cube. An identity simply says: the same pile of pieces, arranged another way, has the same total area. Like a cake: however you cut it and shuffle the slices, there is the same amount of cake. So once the dissection works, it works for every a and b."),
+        ),
+        About.Page(
+            Bi("怎么看这个 3D 场景", "How to read the 3-D scene"),
+            Bi("颜色就是符号：蓝色 = a 做成的块（a²、a³），琥珀黄 = b（b²、b³），绿色长方形 = ab。立方体里青色 = a²b，黄绿 = ab²。② 站的浅蓝细条是要转过去的那一条。④ 站每一圈彩色 L = 一个奇数 1、3、5……。底边的尺子 = 长度，上面的小球把手改 a、b、n。黑板上的字也用同样的颜色。", "Colour is the symbol: blue = pieces made of a (a², a³), amber = b (b², b³), green rectangles = ab. In the cube, teal = a²b and lime = ab². At station 2 the light-blue strip is the one that swings. At station 4 each coloured L-layer = one odd number 1, 3, 5 ... The ruler along the bottom edge is length; its ball knobs set a, b, n. The board's formula uses the same colours."),
+        ),
+        About.Page(
+            Bi("最常见的错", "The classic slip"),
+            Bi("很多人以为 (a+b)² = a² + b²。取 a = 3、b = 2：左边 5² = 25，右边 9 + 4 = 13，差了 12 —— 正好是两块 3×2 的绿色长方形。在 ① 站把它们拿出来，空洞一眼就能看到。立方体也一样：8 块按 1、3、3、1 分成四类，这串数正是杨辉三角的一行。", "Many people think (a+b)² = a² + b². Try a = 3, b = 2: the left is 5² = 25, the right is 9 + 4 = 13. The missing 12 is exactly two green 3 × 2 rectangles; lift them out at station 1 and you see the holes. The cube works the same way: its 8 blocks fall into groups of 1, 3, 3, 1, a row of Pascal's triangle."),
+        ),
+        About.Page(
+            Bi("今天在哪里？", "Where is it today?"),
+            Bi("心算：21² = 400 + 40 + 1 = 441；51 × 49 = 50² − 1² = 2499。量房子：正方形房间边长各加 10%，面积多出 21% 而不是 20% —— 多的 1% 就是角上那块小 b²。抛硬币算概率、把 (x+y)ⁿ 展开，用的都是 1、3、3、1 这串数。", "Mental maths: 21² = 400 + 40 + 1 = 441, and 51 × 49 = 50² − 1² = 2499. Floor plans: make a square room 10% wider each way and its area grows by 21%, not 20%; the extra 1% is the little b² corner. Coin-toss probabilities and expanding (x + y)ⁿ use the same 1, 3, 3, 1 pattern."),
+        ),
+    ))
 
     override val lesson: Lesson by lazy {
         Lesson(

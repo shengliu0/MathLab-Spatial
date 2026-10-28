@@ -29,6 +29,7 @@ import com.bytedance.mathlab.core.galton.GaltonSim
 import com.bytedance.mathlab.core.galton.Normal
 import com.bytedance.mathlab.core.galton.Rng
 import com.bytedance.mathlab.lab.BakeCache
+import com.bytedance.mathlab.lab.About
 import com.bytedance.mathlab.lab.Bi
 import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
@@ -741,6 +742,34 @@ object GaltonDemo : SpecDemo() {
     // ================================================================ guided track (导学)
 
     private var base = 0L
+
+    // ---- background card (📖): context for a viewer who has never met this topic
+    override val about = About(listOf(
+        About.Page(
+            Bi("这个实验在做什么？", "What is this experiment?"),
+            Bi("两个站（右侧牌切换）。① 高尔顿板：竖着的玻璃板上有一排排发光的钉子。捏顶上的漏斗放球，蓝色小球每碰一颗钉子就随机往左或往右跳，最后落进底下的格子堆起来。拖倾斜把手让板子歪，拖行数把手加钉子。② 骰子之和：选一种骰子（公平、歪的、只出 1 或 6），看 1 个、2 个……30 个骰子之和的分布。", "Two stations (plaques on the right). 1) The Galton board: an upright glass board with rows of glowing pegs. Pinch the funnel to drop balls; each blue ball hops left or right at random at every peg and piles up in the bins. The tilt knob leans the board, the rows knob adds pegs. 2) Dice sums: pick a die (fair, loaded, or one showing only 1 or 6) and see how the sum of 1, 2 ... 30 dice is spread."),
+        ),
+        About.Page(
+            Bi("先认识：概率分布", "First: what is a distribution?"),
+            Bi("单次随机事件猜不准，但重复很多次，规律就出来了。“概率分布”就是一张表：每种结果有多大可能出现。画成柱子就是直方图 —— 底下格子里堆起的球，就是一张活的直方图。掷一个公平骰子，1 到 6 各占 1/6，柱子是平的；而在高尔顿板上，球却会堆成一口钟。", "One random event can't be predicted, but repeat it many times and a pattern appears. A probability distribution is a table: how likely each outcome is. Draw it as bars and you get a histogram; the balls piling up in the bins are a live histogram. One fair die gives 1 to 6 with 1/6 each, a flat row of bars. On the Galton board, though, the balls pile into a bell."),
+        ),
+        About.Page(
+            Bi("钟形曲线的来历", "Where the bell came from"),
+            Bi("1733 年，棣莫弗发现：抛很多次硬币，正面次数的分布越来越像一条光滑的钟形曲线（后来叫正态分布）。拉普拉斯约在 1810 年把它推广成中心极限定理。1870 年代，英国学者高尔顿做了这块钉板来演示，并写进 1889 年的《自然遗传》—— 他想解释人的身高为什么也是钟形。", "In 1733 Abraham de Moivre found that the number of heads in many coin tosses follows, ever more closely, a smooth bell-shaped curve, later called the normal distribution. Around 1810 Laplace generalised it into the central limit theorem. In the 1870s Francis Galton built this peg board to show it, and described it in Natural Inheritance (1889); he wanted to explain why human heights also form a bell."),
+        ),
+        About.Page(
+            Bi("核心：路多的地方球多", "Key idea: more paths, more balls"),
+            Bi("12 排钉子，每个球做 12 次左右选择。落到最边上一格，得 12 次全往右，只有 1 条路；落到正中间，要 6 左 6 右，有 924 种走法。所以中间格的概率约 924/4096 ≈ 23%，边上一格只有 1/4096。就像人的身高：许多小因素有的往高推、有的往矮推，大多互相抵消，于是中等身高最多。", "With 12 rows each ball makes 12 left-right choices. To reach an end bin it must go right all 12 times: only 1 path. To reach the middle it needs 6 lefts and 6 rights: 924 different paths. So the middle bin gets about 924/4096 ≈ 23%, an end bin just 1/4096. Like human height: many small factors push up or down, most cancel out, so medium heights are the most common."),
+        ),
+        About.Page(
+            Bi("怎么看这个 3D 场景", "How to read the 3-D scene"),
+            Bi("① 发光的小点 = 钉子，每一颗都是一次“抛硬币”。蓝色小球 = 一次次随机过程（球多时一颗代表好几颗，读数里写着）。格子里的球堆 = 实际结果。打开「曲线」：金色台阶线 = 精确的二项分布 B(n, p)，粉色曲线 = 正态曲线。② 一排排彩色柱子 = k 个骰子之和的分布，越往后 k 越大；每排上的粉色曲线都是同一条 N(0, 1)。", "1) Glowing dots = pegs, each a coin toss. Blue balls = random runs (when there are many, one drawn ball stands for several; see the readout). The piles in the bins = the results. Switch on 'Curves': gold steps = the exact binomial B(n, p), the pink curve = the normal curve. 2) Each row of coloured bars = the distribution of the sum of k dice, k growing toward the back; every row carries the same pink N(0, 1)."),
+        ),
+        About.Page(
+            Bi("今天在哪里？", "Where is it today?"),
+            Bi("测量误差、考试分数、零件尺寸，都是许多小因素的叠加，常常接近钟形；工厂的质量控制、民调的“误差范围”都靠它，相机传感器的噪声也这样估算。但要看清前提：“许多”而且“独立”。金融市场里大家一起恐慌，选择不再独立，极端情况会比钟形曲线预言的多得多。", "Measurement errors, exam scores and part sizes are sums of many small effects and are often close to a bell; factory quality control and the 'margin of error' in polls rely on it, and camera sensor noise is estimated the same way. But mind the fine print: many, independent effects. When markets panic together the choices are no longer independent, and extremes happen far more often than the bell predicts."),
+        ),
+    ))
 
     override val lesson: Lesson by lazy {
         val c12 = Binomial.choose(12, 6); val pc = Binomial.pmf(12, 0.5)[6]

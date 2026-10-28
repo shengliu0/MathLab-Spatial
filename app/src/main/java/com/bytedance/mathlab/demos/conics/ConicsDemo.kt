@@ -30,6 +30,7 @@ import com.bytedance.mathlab.core.conics.Conics
 import com.bytedance.mathlab.core.conics.Section
 import com.bytedance.mathlab.core.conics.V3d
 import com.bytedance.mathlab.lab.BakeCache
+import com.bytedance.mathlab.lab.About
 import com.bytedance.mathlab.lab.Bi
 import com.bytedance.mathlab.lab.Challenge
 import com.bytedance.mathlab.lab.Lesson
@@ -797,6 +798,34 @@ object ConicsDemo : SpecDemo() {
     // ---------------------------------------------------------------- guided track (导学)
 
     private val inBand get() = sec.type == ConicType.PARABOLA
+
+    // ---- background card (📖): context for a viewer who has never met this topic
+    override val about = About(listOf(
+        About.Page(
+            Bi("这个实验在做什么？", "What is this experiment?"),
+            Bi("一个玻璃双圆锥（两个锥尖对尖），一张发光平面穿过它。拖平面右端的金色把手改变倾斜，拖左端的青色把手平移。切出的曲线会发光，名牌实时显示：圆、椭圆、抛物线或双曲线。捏红色小球显示两个 Dandelin 球，捏白点 P 让它绕曲线跑；右边的黑板把截面摊平给你看。", "A glass double cone (two cones tip to tip) with a glowing plane through it. Drag the gold knob at the plane's right end to tilt it and the teal knob at its left end to slide it. The slice glows and the plaque names it live: circle, ellipse, parabola or hyperbola. Pinch the red ball to show the two Dandelin spheres, and pinch the white point P to send it round; the board on the right shows the slice laid flat."),
+        ),
+        About.Page(
+            Bi("两千年的接力", "A 2,000-year relay"),
+            Bi("约公元前 200 年，古希腊的阿波罗尼奥斯写了《圆锥曲线论》，椭圆、抛物线、双曲线这些名字就来自他。那时它只是纯几何。1609 年，开普勒发现行星绕太阳走椭圆，太阳在一个焦点上；伽利略则发现抛出的石头走抛物线。1822 年，丹德林用两个球给出了一个极漂亮的证明。", "Around 200 BC the Greek geometer Apollonius wrote Conics; the names ellipse, parabola and hyperbola come from him. Back then it was pure geometry. In 1609 Kepler found that planets move on ellipses with the Sun at one focus, and Galileo showed that a thrown stone follows a parabola. In 1822 Germinal Dandelin gave a beautiful proof using two spheres."),
+        ),
+        About.Page(
+            Bi("核心：切的角度", "Key idea: the angle of the cut"),
+            Bi("拿手电筒照墙：正对着墙，光斑是圆；斜一点，成了椭圆；斜到光锥的边正好和墙平行，光斑一头永远合不上，就是抛物线；再斜，就是双曲线。光锥就是圆锥，墙就是平面。四种曲线是一家人，用离心率 e 区分：圆 e = 0，椭圆 e < 1，抛物线 e = 1，双曲线 e > 1。", "Shine a torch at a wall. Straight on, the spot is a circle; tilt it and it becomes an ellipse; tilt until the edge of the beam runs parallel to the wall and the spot never closes: a parabola; tilt further: a hyperbola. The beam is the cone, the wall is the plane. The four curves are one family, told apart by the eccentricity e: circle e = 0, ellipse e < 1, parabola e = 1, hyperbola e > 1."),
+        ),
+        About.Page(
+            Bi("怎么看这个 3D 场景", "How to read the 3-D scene"),
+            Bi("蓝色玻璃锥上的线 = 母线（过锥尖的直线）。发光平面 = 刀，黄色发光曲线 = 截出的曲线。亮起金色的线 = 平面和这条母线平行，此时是抛物线。红球、绿球 = Dandelin 球，卡在锥里又贴着平面：红圈、绿圈是它们贴锥面的地方，贴平面的两点 F₁、F₂ 就是焦点。白点 P 用两根线连着焦点，Q₁、Q₂ 在两个圈上。", "Lines on the blue glass cone = generators (lines through the tip). Glowing plane = the knife; glowing yellow curve = the slice. A gold line lights up when the plane is parallel to it: a parabola. Red and green balls = Dandelin spheres, wedged in the cone and touching the plane; their rings touch the cone, and their touch points F₁, F₂ on the plane are the foci. White P is tied to the foci by strings; Q₁, Q₂ sit on the rings."),
+        ),
+        About.Page(
+            Bi("一眼看懂的证明", "A proof at a glance"),
+            Bi("椭圆上任一点到两个焦点的距离之和不变 —— 园丁用两根桩、一根绳就能画椭圆。为什么？从一点到同一个球的切线一样长：PF₁ = PQ₁，PF₂ = PQ₂。所以 PF₁ + PF₂ = Q₁Q₂，就是两个圈之间那段母线，对每个 P 都一样长。一个公式都不用。", "From any point of an ellipse, the distances to the two foci add up to the same total; that is how gardeners draw one with two pegs and a string tied between them. Why? Tangent lines from one point to one sphere are equally long: PF₁ = PQ₁ and PF₂ = PQ₂. So PF₁ + PF₂ = Q₁Q₂, the piece of generator between the two rings, the same for every P. No formula needed."),
+        ),
+        About.Page(
+            Bi("今天在哪里？", "Where is it today?"),
+            Bi("卫星锅、汽车大灯、手电筒的反光碗都是抛物面：平行光全部汇到焦点，或从焦点射出变成平行光。椭圆的两个焦点能互相“传话”：医院的体外碎石机把冲击波从一个焦点聚到另一个焦点上的结石。行星、卫星的轨道是椭圆；掠过太阳的彗星可能走双曲线，一去不回。", "Satellite dishes, car headlights and torch reflectors are parabolic: parallel rays all meet at the focus, or leave it as a parallel beam. An ellipse's two foci talk to each other: a lithotripter sends shock waves from one focus to a kidney stone sitting at the other. Planet and satellite orbits are ellipses; a comet swinging past the Sun can follow a hyperbola and never return."),
+        ),
+    ))
 
     override val lesson: Lesson by lazy {
         Lesson(
